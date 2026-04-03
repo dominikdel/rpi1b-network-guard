@@ -1,26 +1,26 @@
 [Unit]
-Description=Asynchroniczny Agent Monitorujący Network Guard (Python 3)
-Documentation=https://github.com/TwojProfil/rpi-network-guard
-# Bezwzględne czekanie na inicjalizację kart sieciowych i ufw
+Description=Asynchronous Monitoring Agent Network Guard (Python 3)
+Documentation=https://github.com/YourProfile/rpi-network-guard
+# Wait strictly for network interfaces and ufw initialization
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-# Architektura najmniejszych uprawnień (Least Privilege)
+# Least Privilege Architecture
 User=pi
 Group=pi
 
-# Eliminacja asynchronicznego buforowania, dla czystych logów w journalctl
+# Eliminate asynchronous buffering for clean journalctl logs
 Environment=PYTHONUNBUFFERED=1
 
-# Ścisła ścieżka do środowiska uruchomieniowego (zaleca się zmianę na ścieżkę absolutną)
+# Strict path to runtime environment (change to your absolute path)
 WorkingDirectory=/home/pi/rpi-network-guard
 ExecStart=/usr/bin/python3 /home/pi/rpi-network-guard/src/net_guard/main.py
 
-# Wyrafinowana logika samonaprawy
+# Sophisticated self-healing logic
 Restart=on-failure
 RestartSec=10
 
 [Install]
-# Zarejestrowanie usługi w procesie bootowania
+# Register service during boot process
 WantedBy=multi-user.target
