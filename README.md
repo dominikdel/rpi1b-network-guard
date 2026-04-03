@@ -10,52 +10,52 @@
 
 ---
 
-## 📋 Opis projektu
+## 📋 Project Overview
 
-Celem projektu było **przywrócenie pełnej użyteczności legacy hardware** (Raspberry Pi 1B, 512MB RAM) poprzez głęboką optymalizację systemu **Raspberry Pi OS Lite** oraz implementację autorskiego systemu monitorowania infrastruktury sieciowej z powiadomieniami w czasie rzeczywistym.
+The primary goal of this project was to **restore full operational capability to legacy hardware** (Raspberry Pi 1B, 512MB RAM) through deep optimization of **Raspberry Pi OS Lite**, combined with a custom-built network infrastructure monitoring system featuring real-time Telegram alerting.
 
-> 💡 Projekt udowadnia, że przy odpowiedniej konfiguracji jądra Linux i selektywnym doborze usług, **sprzęt sprzed dekady** może służyć jako stabilne i bezpieczne narzędzie w nowoczesnej infrastrukturze sieciowej.
+> 💡 This project proves that with proper Linux kernel tuning and selective service deployment, **decade-old hardware** can still serve as a reliable and secure asset in modern network infrastructures.
 
 ---
 
-## 🛠️ Wykorzystane technologie
+## 🛠️ Technologies & Tools
 
-| Kategoria | Szczegóły |
+| Category | Details |
 |---|---|
 | **Hardware** | Raspberry Pi 1B — Single-core 700MHz, 512MB RAM |
-| **System operacyjny** | Raspberry Pi OS Lite (32-bit, Debian Bookworm) |
-| **Język** | Python 3.11 |
-| **Zabezpieczenia** | UFW (Uncomplicated Firewall) |
-| **Integracje** | Telegram Bot API (`requests`) |
-| **Zarządzanie pamięcią** | zRAM, Linux Kernel Swap Management |
+| **Operating System** | Raspberry Pi OS Lite (32-bit, Debian Bookworm) |
+| **Language** | Python 3.11 |
+| **Security** | UFW (Uncomplicated Firewall) |
+| **Integrations** | Telegram Bot API (`requests`) |
+| **Memory Management** | zRAM, Linux Kernel Swap Management |
 
 ---
 
-## 🚀 Kluczowe optymalizacje systemu
+## 🚀 Key System Optimizations
 
-W celu zapewnienia płynności działania na mocno ograniczonych zasobach, przeprowadzono następujące kroki:
+To ensure smooth operation under severely constrained resources, the following steps were implemented:
 
-### 1. ⚡ Overclocking CPU
-Stabilne podniesienie taktowania procesora z **700MHz do 900MHz** (profil High) bez utraty stabilności systemu.
+### 1. ⚡ CPU Overclocking
+Safely increased CPU frequency from **700MHz to 900MHz** (High profile) without any stability loss.
 
 ### 2. 🎮 GPU Memory Split
-Redukcja przydzielonej pamięci wideo do **16MB** — tryb Headless (brak wyświetlacza), co oddaje więcej RAM procesom systemowym.
+Reduced video memory allocation to **16MB** — Headless mode (no display), freeing more RAM for system processes.
 
-### 3. 🧠 Implementacja zRAM
-Zastąpienie fizycznego swapu na karcie SD **skompresowaną przestrzenią w RAM** (algorytm `lz4`).
+### 3. 🧠 zRAM Implementation
+Replaced physical SD card swap with **compressed RAM blocks** (using the `lz4` algorithm).
 
 ```bash
 sudo systemctl status zramswap
 zramctl
 ```
 
-**Korzyści:**
-- Znaczna redukcja opóźnień I/O
-- Wydłużenie żywotności karty SD
-- Szybszy dostęp do danych swap
+**Benefits:**
+- Significant reduction in I/O latency
+- Extended SD card lifespan
+- Faster swap data access
 
 ### 4. 🧹 System Debloating
-Wyłączenie zbędnych usług systemowych zwalniających zasoby CPU:
+Disabled redundant background services to free up CPU cycles:
 
 ```bash
 sudo systemctl disable --now avahi-daemon
@@ -64,7 +64,7 @@ sudo systemctl disable --now ModemManager
 ```
 
 ### 5. 🔒 Hardening — UFW Firewall
-Konfiguracja firewalla w modelu **"Default Deny"** — domyślne blokowanie całego ruchu przychodzącego:
+Configured firewall using a strict **"Default Deny"** incoming policy:
 
 ```bash
 sudo apt update && sudo apt install ufw -y
@@ -77,18 +77,34 @@ sudo ufw status verbose
 
 ---
 
-## 🛡️ Network Guard (Strażnik Sieci)
+## 🛡️ Network Guard (Monitoring Agent)
 
-Zaimplementowano autorski skrypt w Pythonie pełniący rolę **lekkiego agenta monitorującego** infrastrukturę sieciową.
+A custom lightweight Python script acting as a **persistent network monitoring daemon**.
 
-### Funkcjonalności
+### Features
 
-- **📡 Monitoring ICMP** — cykliczne sprawdzanie dostępności bramy domyślnej oraz zewnętrznych serwerów DNS
-- **🔍 Detekcja incydentów** — identyfikacja błędnych konfiguracji firewalla oraz awarii warstwy 3 (IP)
-- **📲 System alertów** — natychmiastowe powiadomienia przez **Telegram Bot API** o każdym incydencie sieciowym
-- **⚙️ Automatyzacja** — skrypt działa jako persystentny daemon zarządzany przez `systemd`
+- **📡 ICMP Monitoring** — cyclic availability checks on the default gateway and external DNS servers
+- **🔍 Incident Detection** — identifies firewall misconfigurations and Layer 3 (IP) routing failures
+- **📲 Alerting System** — instant notifications via **Telegram Bot API** on every network incident
+- **⚙️ Automation** — runs as a persistent background daemon managed by `systemd`
 
-### Uruchomienie jako systemd daemon
+### Setup & Run
+
+1. Clone the repository and configure your bot token in `monitoring.py`:
+
+```bash
+git clone https://github.com/dominikdel/rpi1b-network-guard.git
+cd rpi1b-network-guard
+nano monitoring.py
+```
+
+2. Install dependencies:
+
+```bash
+pip3 install requests
+```
+
+3. Deploy as a systemd daemon:
 
 ```bash
 sudo systemctl enable net-monitor.service
@@ -98,43 +114,43 @@ sudo systemctl status net-monitor.service
 
 ---
 
-## 📈 Wyniki i Diagnostyka
+## 📈 Results & Diagnostics
 
-Po przeprowadzeniu optymalizacji, system w stanie spoczynku osiąga następujące parametry:
+Post-optimization metrics at system idle:
 
-| Metryka | Wartość |
+| Metric | Value |
 |---|---|
-| **Zużycie RAM** | ~56MB / 428MB (ok. **13%**) |
+| **RAM Usage** | ~56MB / 428MB (approx. **13%**) |
 | **Load Average** | ~0.06 |
-| **Temperatura CPU** | ~42°C (pasywne chłodzenie + OC) |
+| **CPU Temperature** | ~42°C (passive cooling + OC) |
 
 ```bash
-# Sprawdzenie temperatury
+# Check CPU temperature
 vcgencmd measure_temp
 
-# Podgląd zasobów
+# Resource overview
 htop
 ```
 
 ---
 
-## 💡 Wnioski i plany rozwoju
+## 💡 Conclusions & Future Scope
 
-Projekt potwierdza, że **stary sprzęt ≠ bezużyteczny sprzęt**. Przy odpowiednim tuningu jądra Linux i eliminacji zbędnych usług, Raspberry Pi 1B może pełnić rolę niezawodnego i bezpiecznego węzła sieciowego.
+This project confirms that **old hardware ≠ useless hardware**. With proper Linux kernel tuning and elimination of unnecessary services, the Raspberry Pi 1B can serve as a reliable and secure network node.
 
-### 🔮 Planowane funkcje
-- [ ] **Pi-hole** — sieciowy DNS sinkholing i blokowanie reklam
-- [ ] Rozszerzone logowanie zdarzeń sieciowych
-- [ ] Dashboard webowy do podglądu metryk w czasie rzeczywistym
+### 🔮 Planned Features
+- [ ] **Pi-hole** — network-wide DNS sinkholing and ad blocking
+- [ ] Extended network event logging
+- [ ] Web dashboard for real-time metrics monitoring
 
 ---
 
-## 📄 Licencja
+## 📄 License
 
-Projekt udostępniony na licencji [MIT](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 <p align="center">
-  Wykonane z pasją do Linuksa i cyberbezpieczeństwa 🐧🔐
+  Built with passion for Linux and cybersecurity 🐧🔐
 </p>
