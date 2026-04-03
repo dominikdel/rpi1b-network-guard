@@ -1,0 +1,33 @@
+name: Kontrola Jakości (Lint & Test)
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Konfiguracja środowiska Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+        
+    - name: Instalacja narzędzi deweloperskich
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest
+        if [ -f pyproject.toml ]; then pip install -e .; fi
+        
+    - name: Linting struktury kodu używając Ruff
+      run: |
+        ruff check src/ tests/
+        
+    - name: Wykonanie testów jednostkowych
+      run: |
+        pytest

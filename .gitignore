@@ -1,0 +1,19 @@
+# Typowe pliki Python / Środowiska wirtualnego
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# Środowisko developerskie IDE
+.vscode/
+.idea/
+
+# Pliki z wrażliwymi danymi konfiguracji wdrożeniowej (Bezwzględnie ignorowane)
+.env
+.env.local
+secret_keys.json
+
+# Pliki systemowe logów i zrzutów zRAM (jeżeli zapisane lokalnie)
+*.log
